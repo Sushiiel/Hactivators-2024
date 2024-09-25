@@ -1,25 +1,26 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Box, Avatar, Typography, Button, IconButton } from "@mui/material";
 import red from "@mui/material/colors/red";
-import { useAuth } from "../context/AuthContext";
 import ChatItem from "../components/chat/ChatItem";
 import { IoMdSend } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
 import {
   deleteUserChats,
   getUserChats,
   sendChatRequest,
 } from "../helpers/api-communicator";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext"; // Add this line to access auth context
+
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
+
 const Chat = () => {
-  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const auth = useAuth();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const auth = useAuth(); // Access authentication context
+
   const handleSubmit = async () => {
     const content = inputRef.current?.value as string;
     if (inputRef && inputRef.current) {
@@ -29,8 +30,8 @@ const Chat = () => {
     setChatMessages((prev) => [...prev, newMessage]);
     const chatData = await sendChatRequest(content);
     setChatMessages([...chatData.chats]);
-    //
   };
+
   const handleDeleteChats = async () => {
     try {
       toast.loading("Deleting Chats", { id: "deletechats" });
@@ -42,25 +43,21 @@ const Chat = () => {
       toast.error("Deleting chats failed", { id: "deletechats" });
     }
   };
+
+  // Load chats on page load, whether logged in or not
   useLayoutEffect(() => {
-    if (auth?.isLoggedIn && auth.user) {
-      toast.loading("Loading Chats", { id: "loadchats" });
-      getUserChats()
-        .then((data) => {
-          setChatMessages([...data.chats]);
-          toast.success("Successfully loaded chats", { id: "loadchats" });
-        })
-        .catch((err) => {
-          console.log(err);
-          toast.error("Loading Failed", { id: "loadchats" });
-        });
-    }
-  }, [auth]);
-  useEffect(() => {
-    if (!auth?.user) {
-      return navigate("/login");
-    }
-  }, [auth]);
+    toast.loading("Loading Chats", { id: "loadchats" });
+    getUserChats()
+      .then((data) => {
+        setChatMessages([...data.chats]);
+        toast.success("Successfully loaded chats", { id: "loadchats" });
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Loading Failed", { id: "loadchats" });
+      });
+  }, []);
+
   return (
     <Box
       sx={{
@@ -90,24 +87,33 @@ const Chat = () => {
             mx: 3,
           }}
         >
-          <Avatar
-            sx={{
-              mx: "auto",
-              my: 2,
-              bgcolor: "white",
-              color: "black",
-              fontWeight: 700,
-            }}
-          >
-            {auth?.user?.name[0]}
-            {auth?.user?.name.split(" ")[1][0]}
-          </Avatar>
-          <Typography sx={{ mx: "auto", fontFamily: "work sans" }}>
-            You are talking to a ChatBOT
-          </Typography>
+          {/* Check if user is logged in to display avatar, else hide */}
+          {auth?.user ? (
+            <>
+              <Avatar
+                sx={{
+                  mx: "auto",
+                  my: 2,
+                  bgcolor: "white",
+                  color: "black",
+                  fontWeight: 700,
+                }}
+              >
+                {auth?.user?.name[0]}
+                {auth?.user?.name.split(" ")[1][0]}
+              </Avatar>
+              <Typography sx={{ mx: "auto", fontFamily: "work sans" }}>
+                You are talking to a ChatBOT
+              </Typography>
+            </>
+          ) : (
+            <Typography sx={{ mx: "auto", fontFamily: "work sans", mt: 3 }}>
+              Guest User - Chat with the bot
+            </Typography>
+          )}
           <Typography sx={{ mx: "auto", fontFamily: "work sans", my: 4, p: 3 }}>
-            You can ask some questions related to Knowledge, Business, Advices,
-            Education, etc. But avoid sharing personal information
+            You can ask questions related to Knowledge, Business, Advice,
+            Education, etc. But avoid sharing personal information.
           </Typography>
           <Button
             onClick={handleDeleteChats}
@@ -162,7 +168,6 @@ const Chat = () => {
           }}
         >
           {chatMessages.map((chat, index) => (
-            //@ts-ignore
             <ChatItem content={chat.content} role={chat.role} key={index} />
           ))}
         </Box>
@@ -175,7 +180,6 @@ const Chat = () => {
             margin: "auto",
           }}
         >
-          {" "}
           <input
             ref={inputRef}
             type="text"

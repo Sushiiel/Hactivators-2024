@@ -2,12 +2,13 @@ import React, { useEffect } from "react";
 import { IoIosLogIn } from "react-icons/io";
 import { Box, Typography, Button } from "@mui/material";
 import CustomizedInput from "../components/shared/CustomizedInput";
-import { toast } from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+
 const Signup = () => {
   const navigate = useNavigate();
   const auth = useAuth();
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -15,19 +16,21 @@ const Signup = () => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     try {
-      toast.loading("Signing Up", { id: "signup" });
       await auth?.signup(name, email, password);
-      toast.success("Signed Up Successfully", { id: "signup" });
+      // After signup, navigate to chat page regardless of authentication state
+      navigate("/chat");
     } catch (error) {
       console.log(error);
-      toast.error("Signing Up Failed", { id: "signup" });
     }
   };
+
   useEffect(() => {
     if (auth?.user) {
-      return navigate("/chat");
+      // Navigate to chat if user is authenticated
+      navigate("/chat");
     }
   }, [auth]);
+
   return (
     <Box width={"100%"} height={"100%"} display="flex" flex={1}>
       <Box padding={8} mt={8} display={{ md: "flex", sm: "none", xs: "none" }}>
