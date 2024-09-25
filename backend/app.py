@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/getvid', methods=['GET'])
 def send_manim_file():
-    output_path = r"E:\Projects\Hactivators-2024\backend\media\videos\scene\1080p60\PythagorasTheorem.mp4"
+    output_path = r"E:\Projects\Hactivators-2024\backend\media\videos\scene\1080p60\out_file.mp4"
     return send_file(output_path, as_attachment=True)
 
 @app.route('/render', methods=['POST'])
@@ -25,8 +25,8 @@ def render_manim():
             temp_file.write(manim_code)
 
         # Run the Manim render command to generate the video
-        output_file_name = "PythagorasTheorem.mp4"
-        output_path = r"E:\Projects\Hactivators-2024\backend\media\videos\scene\1080p60\PythagorasTheorem.mp4"
+        output_file_name = "out_file.mp4"
+        output_path = r"E:\Projects\Hactivators-2024\backend\media\videos\scene\1080p60\out_file.mp4"
         
         # Call Manim using subprocess to render the video
         command = [
