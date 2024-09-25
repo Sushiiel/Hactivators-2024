@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Avatar, Typography } from "@mui/material";
-import { useAuth } from "../../context/AuthContext";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { coldarkDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
@@ -32,7 +31,6 @@ const ChatItem = ({
   role: "user" | "assistant";
 }) => {
   const messageBlocks = extractCodeFromString(content);
-  const auth = useAuth();
 
   // Conditional background for messages
   const backgroundColor = role === "assistant" ? "#7C3AED" : "#9B59B6";
@@ -53,8 +51,6 @@ const ChatItem = ({
           <img src="openai.png" alt="openai" width={"30px"} />
         ) : (
           <>
-            {auth?.user?.name[0]}
-            {auth?.user?.name.split(" ")[1][0]}
           </>
         )}
       </Avatar>

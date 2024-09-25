@@ -4,6 +4,8 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import ChatItem from "../components/chat/ChatItem";
 import { IoMdSend } from "react-icons/io";
 import toast from "react-hot-toast";
+import axios from "axios";
+import { BASEURL } from "./constants";
 
 // Define theme with #7C3AED as the primary color
 const theme = createTheme({
@@ -26,12 +28,44 @@ const theme = createTheme({
 const Chat = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const chatContainerRef = useRef<HTMLDivElement | null>(null); // Ref for the chat container
-  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [chatMessages, setChatMessages] = useState<[]>([]);
+  const [prompt, setPrompt] = useState<string>("");
+
 
   const handleSubmit = async () => {
     const content = inputRef.current?.value as string;
     if (inputRef && inputRef.current) {
       inputRef.current.value = "";
+    }
+    console.log("yoyo came inside handle submit")
+    try{
+      console.log("yoyoyoyoy try")
+      const formattedCode = content
+            .replace(/\\/g, '\\\\') // Escape backslashes
+            .replace(/"/g, '\\"')   // Escape double quotes
+            .replace(/\n/g, '\\n'); // Escape newline characters
+      const resp = await axios.post(`${BASEURL}v2/render`, {
+        code: prompt,
+        filename: "frontend.mp4"
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log("yoyoyoyoy requested")
+      if(resp.data.video_url){
+        const newMessage = { role: "user", content, type: "text" };
+        setChatMessages((prev) => [...prev, newMessage]);
+        const videoMessage = {
+          role: "assistant",
+          content: resp.data.video_url,
+          type: "video",
+        };
+        setChatMessages((prev) => [...prev, videoMessage]);
+
+      }
+    }catch(err){
+      console.log(err)
     }
 
     const newMessage: Message = { role: "user", content, type: "text" };
@@ -280,11 +314,11 @@ const Chat = () => {
                 width: "100%",
               }}
             >
-              <input
+              <textarea
                 ref={inputRef}
-                type="text"
                 placeholder="Type a message"
                 onKeyDown={handleKeyDown}
+                onChange={(e) => {setPrompt(e.target.value)}}
                 style={{
                   flex: 1,
                   padding: "10px",
