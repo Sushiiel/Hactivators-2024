@@ -1,35 +1,60 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Box, Avatar, Typography, Button, IconButton } from "@mui/material";
-import red from "@mui/material/colors/red";
+import { Box, Typography, Button, IconButton } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import ChatItem from "../components/chat/ChatItem";
 import { IoMdSend } from "react-icons/io";
-import {
-  deleteUserChats,
-  getUserChats,
-  sendChatRequest,
-} from "../helpers/api-communicator";
+import { deleteUserChats, getUserChats, sendChatRequest } from "../helpers/api-communicator";
 import toast from "react-hot-toast";
-import { useAuth } from "../context/AuthContext"; // Add this line to access auth context
 
 type Message = {
   role: "user" | "assistant";
   content: string;
+  type: "text" | "video"; // Distinguish between text and video messages
 };
+
+// Define theme with #7C3AED as the primary color
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#7C3AED", // Set primary color
+    },
+    background: {
+      default: "#1E1E2D", // Background for the entire app
+    },
+    text: {
+      primary: "#FFFFFF", // White for primary text color
+    },
+  },
+  typography: {
+    fontFamily: "Work Sans, sans-serif", // Global font family
+  },
+});
 
 const Chat = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
-  const auth = useAuth(); // Access authentication context
 
   const handleSubmit = async () => {
     const content = inputRef.current?.value as string;
     if (inputRef && inputRef.current) {
       inputRef.current.value = "";
     }
-    const newMessage: Message = { role: "user", content };
+
+    const newMessage: Message = { role: "user", content, type: "text" };
     setChatMessages((prev) => [...prev, newMessage]);
-    const chatData = await sendChatRequest(content);
-    setChatMessages([...chatData.chats]);
+
+    // Show video message if input is "arjun"
+    if (content.toLowerCase() === "arjun") {
+      const videoMessage: Message = {
+        role: "assistant",
+        content: "https://myawsstestings3.s3.eu-north-1.amazonaws.com/Video+Files/1+h.mp4",
+        type: "video",
+      };
+      setChatMessages((prev) => [...prev, videoMessage]);
+    } else {
+      const chatData = await sendChatRequest(content);
+      setChatMessages([...chatData.chats]);
+    }
   };
 
   const handleDeleteChats = async () => {
@@ -44,7 +69,6 @@ const Chat = () => {
     }
   };
 
-  // Load chats on page load, whether logged in or not
   useLayoutEffect(() => {
     toast.loading("Loading Chats", { id: "loadchats" });
     getUserChats()
@@ -59,146 +83,187 @@ const Chat = () => {
   }, []);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flex: 1,
-        width: "100%",
-        height: "100%",
-        mt: 3,
-        gap: 3,
-      }}
-    >
-      <Box
-        sx={{
-          display: { md: "flex", xs: "none", sm: "none" },
-          flex: 0.2,
-          flexDirection: "column",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            width: "100%",
-            height: "60vh",
-            bgcolor: "rgb(17,29,39)",
-            borderRadius: 5,
-            flexDirection: "column",
-            mx: 3,
-          }}
-        >
-          {/* Check if user is logged in to display avatar, else hide */}
-          {auth?.user ? (
-            <>
-              <Avatar
-                sx={{
-                  mx: "auto",
-                  my: 2,
-                  bgcolor: "white",
-                  color: "black",
-                  fontWeight: 700,
-                }}
-              >
-                {auth?.user?.name[0]}
-                {auth?.user?.name.split(" ")[1][0]}
-              </Avatar>
-              <Typography sx={{ mx: "auto", fontFamily: "work sans" }}>
-                You are talking to a ChatBOT
-              </Typography>
-            </>
-          ) : (
-            <Typography sx={{ mx: "auto", fontFamily: "work sans", mt: 3 }}>
-              Guest User - Chat with the bot
-            </Typography>
-          )}
-          <Typography sx={{ mx: "auto", fontFamily: "work sans", my: 4, p: 3 }}>
-            You can ask questions related to Knowledge, Business, Advice,
-            Education, etc. But avoid sharing personal information.
-          </Typography>
-          <Button
-            onClick={handleDeleteChats}
-            sx={{
-              width: "200px",
-              my: "auto",
-              color: "white",
-              fontWeight: "700",
-              borderRadius: 3,
-              mx: "auto",
-              bgcolor: red[300],
-              ":hover": {
-                bgcolor: red.A400,
-              },
-            }}
-          >
-            Clear Conversation
-          </Button>
-        </Box>
-      </Box>
+    <ThemeProvider theme={theme}>
       <Box
         sx={{
           display: "flex",
-          flex: { md: 0.8, xs: 1, sm: 1 },
-          flexDirection: "column",
-          px: 3,
+          flexDirection: "column", // Move EduVerse GPT to the top
+          width: "100%",
+          height: "100vh", // Full height for the chatbox
+          mt: 3,
+          gap: 3,
+          bgcolor: "background.default", // Apply theme background color
         }}
       >
+        {/* EduVerse GPT heading at the top */}
         <Typography
           sx={{
             fontSize: "40px",
-            color: "white",
+            color: "text.primary", // Use theme text color
             mb: 2,
             mx: "auto",
             fontWeight: "600",
           }}
         >
-        EduVerse GPT
+          EduVerse GPT
         </Typography>
+
         <Box
           sx={{
-            width: "100%",
-            height: "60vh",
-            borderRadius: 3,
-            mx: "auto",
             display: "flex",
-            flexDirection: "column",
-            overflow: "scroll",
-            overflowX: "hidden",
-            overflowY: "auto",
-            scrollBehavior: "smooth",
+            flex: 1, // Take up all available space
+            gap: 3,
           }}
         >
-          {chatMessages.map((chat, index) => (
-            <ChatItem content={chat.content} role={chat.role} key={index} />
-          ))}
-        </Box>
-        <div
-          style={{
-            width: "100%",
-            borderRadius: 8,
-            backgroundColor: "rgb(17,27,39)",
-            display: "flex",
-            margin: "auto",
-          }}
-        >
-          <input
-            ref={inputRef}
-            type="text"
-            style={{
-              width: "100%",
-              backgroundColor: "transparent",
-              padding: "30px",
-              border: "none",
-              outline: "none",
-              color: "white",
-              fontSize: "20px",
+          <Box
+            sx={{
+              display: { md: "flex", xs: "none", sm: "none" },
+              flex: 0.2,
+              flexDirection: "column",
             }}
-          />
-          <IconButton onClick={handleSubmit} sx={{ color: "white", mx: 1 }}>
-            <IoMdSend />
-          </IconButton>
-        </div>
+          >
+            <Box
+              sx={{
+                display: "flex",
+                width: "100%",
+                height: "80vh", // Match height with chatbox
+                bgcolor: "#2C2C3D", // Dark background for the side panel
+                borderRadius: 5,
+                flexDirection: "column",
+                mx: 3,
+              }}
+            >
+              <Typography
+                sx={{
+                  mx: "auto",
+                  fontFamily: "Work Sans",
+                  mt: 3,
+                  color: "text.primary",
+                }}
+              >
+                Chat with EduVerse GPT
+              </Typography>
+              <Typography
+                sx={{
+                  mx: "auto",
+                  fontFamily: "Work Sans",
+                  my: 4,
+                  p: 3,
+                  color: "text.primary",
+                }}
+              >
+                Ask questions related to Knowledge, Business, Advice, Education, etc. Avoid sharing personal information.
+              </Typography>
+              <Button
+                onClick={handleDeleteChats}
+                sx={{
+                  width: "200px",
+                  my: "auto",
+                  color: "text.primary", // Text color using theme
+                  fontWeight: "700",
+                  borderRadius: 3,
+                  mx: "auto",
+                  bgcolor: "primary.main", // Primary color from theme
+                  ":hover": {
+                    bgcolor: "#5B27A0", // Darker shade for hover
+                  },
+                }}
+              >
+                Clear Conversation
+              </Button>
+            </Box>
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              flex: { md: 0.8, xs: 1, sm: 1 },
+              flexDirection: "column",
+              px: 3,
+              height: "80vh", // Chat and video height
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                width: "100%",
+                height: "calc(100% - 100px)", // Adjust height to fit within container
+                borderRadius: 3,
+                mx: "auto",
+                display: "flex",
+                flexDirection: "column",
+                overflowY: "auto", // Enable scrolling for long chat
+                scrollBehavior: "smooth",
+              }}
+            >
+              {chatMessages.map((chat, index) =>
+                chat.type === "video" ? (
+                  <video
+                    key={index}
+                    controls
+                    style={{
+                      width: "100%",
+                      maxHeight: "calc(100% - 20px)", // Scale video to fit
+                      objectFit: "contain", // Contain within bounds
+                    }}
+                  >
+                    <source src={chat.content} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <ChatItem
+                    content={chat.content}
+                    role={chat.role}
+                    key={index}
+                    sx={{
+                      backgroundColor: chat.role === "user" ? "primary.main" : "#5B27A0", // Violet theme for response
+                      borderRadius: 2,
+                      padding: "10px",
+                      margin: "10px 0",
+                    }}
+                  />
+                )
+              )}
+            </Box>
+            <div
+              style={{
+                width: "100%",
+                borderRadius: 8,
+                backgroundColor: "#1E1E2D",
+                display: "flex",
+                margin: "auto",
+                marginTop: 10,
+                padding: "10px 0",
+                border: "1px solid #7C3AED", // Add border to chat input area
+              }}
+            >
+              <input
+                ref={inputRef}
+                type="text"
+                style={{
+                  width: "100%",
+                  backgroundColor: "transparent",
+                  padding: "20px",
+                  border: "none",
+                  outline: "none",
+                  color: "white",
+                  fontSize: "20px",
+                }}
+              />
+              <IconButton
+                onClick={handleSubmit}
+                sx={{
+                  color: "primary.main", // Use theme primary color
+                  mx: 1,
+                }}
+              >
+                <IoMdSend />
+              </IconButton>
+            </div>
+          </Box>
+        </Box>
       </Box>
-    </Box>
+    </ThemeProvider>
   );
 };
 
