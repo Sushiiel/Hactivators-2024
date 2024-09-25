@@ -220,6 +220,8 @@ const Chat = () => {
                       borderRadius: 2,
                       padding: "10px",
                       margin: "10px 0",
+                      maxWidth: "80%", // Limit width for better readability
+                      alignSelf: chat.role === "user" ? "flex-end" : "flex-start", // Align user and assistant messages differently
                     }}
                   />
                 )
@@ -228,26 +230,29 @@ const Chat = () => {
             <div
               style={{
                 width: "100%",
-                borderRadius: 8,
-                backgroundColor: "#1E1E2D",
+                borderRadius: 20, // Increased border radius for a softer look
+                backgroundColor: "#2C2C3D", // Set a darker background for the input area
                 display: "flex",
                 margin: "auto",
                 marginTop: 10,
-                padding: "10px 0",
-                border: "1px solid #7C3AED", // Add border to chat input area
+                padding: "10px 20px", // Add padding for spacing
+                border: "1px solid #7C3AED", // Border color
+                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)", // Slight shadow for depth
               }}
             >
               <input
                 ref={inputRef}
                 type="text"
+                placeholder="Type your message..."
                 style={{
                   width: "100%",
                   backgroundColor: "transparent",
-                  padding: "20px",
+                  padding: "15px 20px", // Adjust padding for better spacing
                   border: "none",
                   outline: "none",
                   color: "white",
-                  fontSize: "20px",
+                  fontSize: "16px", // Adjusted font size
+                  borderRadius: 10, // Round input corners
                 }}
               />
               <IconButton
