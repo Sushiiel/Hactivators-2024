@@ -32,6 +32,7 @@ const theme = createTheme({
 
 const Chat = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null); // Ref for the chat container
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
 
   const handleSubmit = async () => {
@@ -52,17 +53,36 @@ const Chat = () => {
       };
       setChatMessages((prev) => [...prev, videoMessage]);
     } else {
-      const chatData = await sendChatRequest(content);
-      setChatMessages([...chatData.chats]);
+      // Simulate a dummy response
+      const dummyResponse: Message = {
+        role: "assistant",
+        content: "response", // Dummy response
+        type: "text",
+      };
+      setChatMessages((prev) => [...prev, dummyResponse]);
+
+      // Uncomment this to use the actual API request instead
+      // const chatData = await sendChatRequest(content);
+      // setChatMessages([...chatData.chats]);
+    }
+
+    // Scroll to the bottom of the chat container after sending a message
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
 
   const handleDeleteChats = async () => {
     try {
       toast.loading("Deleting Chats", { id: "deletechats" });
-      await deleteUserChats();
-      setChatMessages([]);
+      await deleteUserChats(); // Make sure the API works as intended
+      setChatMessages([]); // Clear the messages
       toast.success("Deleted Chats Successfully", { id: "deletechats" });
+
+      // Scroll to the bottom after clearing messages
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = 0; // Set to 0 after clearing
+      }
     } catch (error) {
       console.log(error);
       toast.error("Deleting chats failed", { id: "deletechats" });
@@ -75,12 +95,25 @@ const Chat = () => {
       .then((data) => {
         setChatMessages([...data.chats]);
         toast.success("Successfully loaded chats", { id: "loadchats" });
+
+        // Scroll to the bottom after loading chats
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
       })
       .catch((err) => {
         console.log(err);
         toast.error("Loading Failed", { id: "loadchats" });
       });
   }, []);
+
+  // Function to handle key down event
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault(); // Prevent default behavior of Enter key
+      handleSubmit(); // Call handleSubmit to send the message
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -185,6 +218,7 @@ const Chat = () => {
             }}
           >
             <Box
+              ref={chatContainerRef} // Attach the ref to the chat container
               sx={{
                 width: "100%",
                 height: "calc(100% - 100px)", // Adjust height to fit within container
@@ -194,6 +228,16 @@ const Chat = () => {
                 flexDirection: "column",
                 overflowY: "auto", // Enable scrolling for long chat
                 scrollBehavior: "smooth",
+                "&::-webkit-scrollbar": {
+                  width: "10px", // Width of the scrollbar
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "#7C3AED", // Scrollbar color
+                  borderRadius: "10px", // Rounded corners
+                },
+                "&::-webkit-scrollbar-track": {
+                  backgroundColor: "#2C2C3D", // Track color
+                },
               }}
             >
               {chatMessages.map((chat, index) =>
@@ -220,51 +264,46 @@ const Chat = () => {
                       borderRadius: 2,
                       padding: "10px",
                       margin: "10px 0",
-                      maxWidth: "80%", // Limit width for better readability
-                      alignSelf: chat.role === "user" ? "flex-end" : "flex-start", // Align user and assistant messages differently
+                      alignSelf: chat.role === "user" ? "flex-end" : "flex-start",
                     }}
                   />
                 )
               )}
             </Box>
-            <div
-              style={{
-                width: "100%",
-                borderRadius: 20, // Increased border radius for a softer look
-                backgroundColor: "#2C2C3D", // Set a darker background for the input area
+
+            <Box
+              sx={{
                 display: "flex",
-                margin: "auto",
-                marginTop: 10,
-                padding: "10px 20px", // Add padding for spacing
-                border: "1px solid #7C3AED", // Border color
-                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.2)", // Slight shadow for depth
+                gap: 1,
+                mt: 2,
+                width: "100%",
               }}
             >
               <input
                 ref={inputRef}
-                type="text"
                 placeholder="Type your message..."
                 style={{
-                  width: "100%",
-                  backgroundColor: "transparent",
-                  padding: "15px 20px", // Adjust padding for better spacing
-                  border: "none",
-                  outline: "none",
-                  color: "white",
-                  fontSize: "16px", // Adjusted font size
-                  borderRadius: 10, // Round input corners
+                  flex: 1,
+                  padding: "10px",
+                  borderRadius: "5px",
+                  border: "1px solid #7C3AED", // Border color
+                  backgroundColor: "#2C2C3D", // Input background
+                  color: "#FFFFFF", // Text color
                 }}
+                onKeyDown={handleKeyDown}
               />
               <IconButton
                 onClick={handleSubmit}
                 sx={{
-                  color: "primary.main", // Use theme primary color
-                  mx: 1,
+                  backgroundColor: "#7C3AED", // Send button color
+                  "&:hover": {
+                    backgroundColor: "#5B27A0", // Hover color
+                  },
                 }}
               >
-                <IoMdSend />
+                <IoMdSend size={24} color="white" />
               </IconButton>
-            </div>
+            </Box>
           </Box>
         </Box>
       </Box>
