@@ -5,11 +5,6 @@ import tempfile
 
 app = Flask(__name__)
 
-@app.route('/getvid', methods=['GET'])
-def send_manim_file():
-    output_path = r"E:\Projects\Hactivators-2024\backend\media\videos\scene\1080p60\out_file.mp4"
-    return send_file(output_path, as_attachment=True)
-
 @app.route('/render', methods=['POST'])
 def render_manim():
     try:
@@ -25,14 +20,14 @@ def render_manim():
             temp_file.write(manim_code)
 
         # Run the Manim render command to generate the video
-        output_file_name = "out_file.mp4"
-        output_path = r"E:\Projects\Hactivators-2024\backend\media\videos\scene\1080p60\out_file.mp4"
+        output_file_name = "PythagorasTheorem.mp4"
+        output_path = os.path.join(temp_dir, output_file_name)
         
         # Call Manim using subprocess to render the video
         command = [
             "manim", 
             temp_file_path, 
-            "out_file",
+            "PythagorasTheorem",
             "-o", 
             output_file_name
         ]
@@ -47,4 +42,4 @@ def render_manim():
         return {"error": str(e)}, 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000,debug=True)
