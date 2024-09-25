@@ -151,7 +151,7 @@ const Chat = () => {
             fontWeight: "600",
           }}
         >
-          Model - GPT 3.5 Turbo
+        EduVerse GPT
         </Typography>
         <Box
           sx={{

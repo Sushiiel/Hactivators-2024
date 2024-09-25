@@ -8,7 +8,7 @@ const customTheme = createTheme({
   palette: {
     primary: {
       main: "#7C3AED", // Violet
-    },
+    }, 
     background: {
       default: "#000000", // Black background
     },
