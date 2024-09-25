@@ -7,42 +7,51 @@ import NavigationLink from "./shared/NavigationLink";
 
 const Header = () => {
   const auth = useAuth();
+  
   return (
     <AppBar
-      sx={{ bgcolor: "transparent", position: "static", boxShadow: "none" }}
+      sx={{
+        bgcolor: "#000000", // Black background
+        position: "static",
+        boxShadow: "none",
+      }}
     >
-      <Toolbar sx={{ display: "flex" }}>
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         <Logo />
         <div>
           {auth?.isLoggedIn ? (
             <>
               <NavigationLink
-                bg="#00fffc"
+                bg="#7C3AED" // Violet background for "Go To Chat" button
                 to="/chat"
                 text="Go To Chat"
-                textColor="black"
+                textColor="white" // White text for contrast
               />
               <NavigationLink
-                bg="#51538f"
+                bg="#000000" // Black background for logout button
                 textColor="white"
                 to="/"
-                text="logout"
+                text="Logout"
                 onClick={auth.logout}
+                borderColor="#7C3AED" // Violet border
+                hoverBg="#7C3AED" // Violet on hover
               />
             </>
           ) : (
             <>
               <NavigationLink
-                bg="#00fffc"
+                bg="#7C3AED" // Violet background for "Login" button
                 to="/login"
                 text="Login"
-                textColor="black"
+                textColor="white" // White text for contrast
               />
               <NavigationLink
-                bg="#51538f"
+                bg="#000000" // Black background for "Signup" button
                 textColor="white"
                 to="/signup"
                 text="Signup"
+                borderColor="#7C3AED" // Violet border
+                hoverBg="#7C3AED" // Violet on hover
               />
             </>
           )}
@@ -52,4 +61,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default Header
