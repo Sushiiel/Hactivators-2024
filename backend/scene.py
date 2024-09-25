@@ -1,0 +1,36 @@
+from manim import *
+
+
+class PythagorasTheorem(Scene):
+    def construct(self):
+        # Create the triangle
+        triangle = Polygon(
+            ORIGIN,
+            RIGHT * 3,
+            RIGHT * 3 + UP * 4,
+            color=WHITE
+        )
+
+        # Labels for the sides
+        a_label = MathTex("a").next_to(triangle, LEFT, buff=0.1)
+        b_label = MathTex("b").next_to(triangle, DOWN, buff=0.1)
+        c_label = MathTex("c").next_to(triangle, RIGHT + UP, buff=0.1)
+
+        # Squares on each side
+        square_a = Square(side_length=4, fill_opacity=0.5, color=BLUE).next_to(triangle, LEFT, buff=0)
+        square_b = Square(side_length=3, fill_opacity=0.5, color=GREEN).next_to(triangle, DOWN, buff=0)
+        square_c = Square(side_length=5, fill_opacity=0.5, color=YELLOW).move_to(triangle.get_vertices()[2])
+
+        # Add elements to the scene
+        self.play(Create(triangle))
+        self.play(Write(a_label), Write(b_label), Write(c_label))
+        self.wait(1)
+        self.play(Create(square_a), Create(square_b))
+        self.wait(1)
+        self.play(Create(square_c))
+        self.wait(2)
+
+        # Display the formula
+        formula = MathTex("a^2 + b^2 = c^2").to_edge(DOWN)
+        self.play(Write(formula))
+        self.wait(3)
