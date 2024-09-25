@@ -1,0 +1,45 @@
+from manim import *
+
+class FibonacciSeries(Scene):
+    def construct(self):
+        # Title
+        title = Text("Fibonacci Series", font_size=48)
+        title.to_edge(UP)
+
+        # Fibonacci Sequence (initial values)
+        fib_sequence = [0, 1]
+
+        # Display initial numbers
+        first_num = MathTex("0")
+        second_num = MathTex("1")
+        
+        # Arrange numbers on the screen
+        first_num.to_edge(LEFT)
+        second_num.next_to(first_num, RIGHT, buff=1)
+        
+        # Display title and first two numbers
+        self.play(Write(title))
+        self.play(Write(first_num), Write(second_num))
+        
+        # Add numbers to the screen sequentially
+        for _ in range(8):  # Limit to keep animation within 20 seconds
+            # Calculate next Fibonacci number
+            next_fib = fib_sequence[-1] + fib_sequence[-2]
+            fib_sequence.append(next_fib)
+
+            # Create MathTex object for the new number
+            next_num = MathTex(str(next_fib))
+            
+            # Position it to the right of the last number
+            next_num.next_to(second_num, RIGHT, buff=1)
+            
+            # Update references
+            self.play(Write(next_num))
+            first_num = second_num
+            second_num = next_num
+
+        # Pause for a moment at the end of the animation
+        self.wait(2)
+
+# Command to render the animation:
+# manim -pql fibonacci.py FibonacciSeries
