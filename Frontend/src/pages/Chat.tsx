@@ -184,8 +184,7 @@ const Chat = () => {
                   color: "text.primary",
                 }}
               >
-                Ask questions related to Knowledge, Business, Advice, Education,
-                etc. Avoid sharing personal information.
+                Educational Animated Video Generator for Your Prompts.
               </Typography>
               <Button
                 onClick={handleDeleteChats}
