@@ -12,7 +12,7 @@ function extractCodeFromString(message: string) {
 }
 
 function isCodeBlock(str: string) {
-  if (
+  return (
     str.includes("=") ||
     str.includes(";") ||
     str.includes("[") ||
@@ -21,11 +21,9 @@ function isCodeBlock(str: string) {
     str.includes("}") ||
     str.includes("#") ||
     str.includes("//")
-  ) {
-    return true;
-  }
-  return false;
+  );
 }
+
 const ChatItem = ({
   content,
   role,
@@ -35,64 +33,77 @@ const ChatItem = ({
 }) => {
   const messageBlocks = extractCodeFromString(content);
   const auth = useAuth();
-  return role == "assistant" ? (
+
+  // Conditional background for messages
+  const backgroundColor = role === "assistant" ? "#7C3AED" : "#9B59B6";
+
+  return (
     <Box
       sx={{
         display: "flex",
         p: 2,
-        bgcolor: "#004d5612",
         gap: 2,
         borderRadius: 2,
         my: 1,
       }}
     >
+      {/* Avatar based on role */}
       <Avatar sx={{ ml: "0" }}>
-        <img src="openai.png" alt="openai" width={"30px"} />
+        {role === "assistant" ? (
+          <img src="openai.png" alt="openai" width={"30px"} />
+        ) : (
+          <>
+            {auth?.user?.name[0]}
+            {auth?.user?.name.split(" ")[1][0]}
+          </>
+        )}
       </Avatar>
       <Box>
+        {/* Content rendering */}
         {!messageBlocks && (
-          <Typography sx={{ fontSize: "20px" }}>{content}</Typography>
+          <Typography
+            sx={{
+              fontSize: "20px",
+              backgroundColor: backgroundColor,
+              padding: "8px 16px",
+              borderRadius: 2,
+              maxWidth: "fit-content", // Ensure it wraps around the text
+            }}
+          >
+            {content}
+          </Typography>
         )}
+        {/* If message has code blocks */}
         {messageBlocks &&
           messageBlocks.length &&
-          messageBlocks.map((block) =>
+          messageBlocks.map((block, index) =>
             isCodeBlock(block) ? (
-              <SyntaxHighlighter style={coldarkDark} language="javascript">
+              <SyntaxHighlighter
+                key={index}
+                style={coldarkDark}
+                language="javascript"
+                customStyle={{
+                  backgroundColor: backgroundColor,
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  maxWidth: "fit-content",
+                }}
+              >
                 {block}
               </SyntaxHighlighter>
             ) : (
-              <Typography sx={{ fontSize: "20px" }}>{block}</Typography>
-            )
-          )}
-      </Box>
-    </Box>
-  ) : (
-    <Box
-      sx={{
-        display: "flex",
-        p: 2,
-        bgcolor: "#004d56",
-        gap: 2,
-        borderRadius: 2,
-      }}
-    >
-      <Avatar sx={{ ml: "0", bgcolor: "black", color: "white" }}>
-        {auth?.user?.name[0]}
-        {auth?.user?.name.split(" ")[1][0]}
-      </Avatar>
-      <Box>
-        {!messageBlocks && (
-          <Typography sx={{ fontSize: "20px" }}>{content}</Typography>
-        )}
-        {messageBlocks &&
-          messageBlocks.length &&
-          messageBlocks.map((block) =>
-            isCodeBlock(block) ? (
-              <SyntaxHighlighter style={coldarkDark} language="javascript">
+              <Typography
+                key={index}
+                sx={{
+                  fontSize: "20px",
+                  backgroundColor: backgroundColor,
+                  padding: "8px 16px",
+                  borderRadius: 2,
+                  maxWidth: "fit-content",
+                }}
+              >
                 {block}
-              </SyntaxHighlighter>
-            ) : (
-              <Typography sx={{ fontSize: "20px" }}>{block}</Typography>
+              </Typography>
             )
           )}
       </Box>
