@@ -37,6 +37,8 @@ const Chat = () => {
     if (inputRef && inputRef.current) {
       inputRef.current.value = "";
     }
+    const newMessage: Message = { role: "user", content, type: "text" };
+    setChatMessages((prev) => [...prev, newMessage]);
     console.log("yoyo came inside handle submit")
     try{
       console.log("yoyoyoyoy try")
@@ -55,7 +57,7 @@ const Chat = () => {
       console.log("yoyoyoyoy requested")
       if(resp.data.video_url){
         const newMessage = { role: "user", content, type: "text" };
-        setChatMessages((prev) => [...prev, newMessage]);
+        // setChatMessages((prev) => [...prev, newMessage]);
         const videoMessage = {
           role: "assistant",
           content: resp.data.video_url,
@@ -68,8 +70,7 @@ const Chat = () => {
       console.log(err)
     }
 
-    const newMessage: Message = { role: "user", content, type: "text" };
-    setChatMessages((prev) => [...prev, newMessage]);
+   
 
     // Show video message if input is "arjun"
     if (content.toLowerCase() === "arjun") {
@@ -82,12 +83,12 @@ const Chat = () => {
       setChatMessages((prev) => [...prev, videoMessage]);
     } else {
       // Simulate a dummy response
-      const dummyResponse: Message = {
-        role: "assistant",
-        content: "response", // Dummy response
-        type: "text",
-      };
-      setChatMessages((prev) => [...prev, dummyResponse]);
+      // const dummyResponse: Message = {
+      //   role: "assistant",
+      //   content: "response", // Dummy response
+      //   type: "text",
+      // };
+      // setChatMessages((prev) => [...prev, dummyResponse]);
     }
   };
 
