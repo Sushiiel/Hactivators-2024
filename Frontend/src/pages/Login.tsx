@@ -17,94 +17,100 @@ const Login = () => {
   return (
     <>
       <Header />
-      <Box width={"100%"} height={"100%"} display="flex" flex={1}>
+      <Box width={"100%"} height={"100%"} display="flex">
+        {/* Left Image */}
         <Box
-          padding={8}
-          mt={8}
-          display={{ md: "flex", sm: "none", xs: "none" }}
+          padding={2}
+          display={{ md: "flex", sm: "none", xs: "none" }} // Show image on larger screens
+          alignItems="center"
+          sx={{ marginLeft: "15%" }} // Shift image 15% to the right
         >
           <img src="airobot.png" alt="Robot" style={{ width: "400px" }} />
         </Box>
+
+        {/* Right Side for Form */}
         <Box
-          display={"flex"}
-          flex={{ xs: 1, md: 0.5 }}
-          justifyContent={"center"}
-          alignItems={"center"}
-          padding={2}
-          ml={"auto"}
-          mt={16}
+          display="flex"
+          justifyContent="flex-end" // Align children to the right
+          alignItems="flex-start" // Align to the top
+          padding={2} // Add some padding for aesthetics
+          flex={1} // Take the remaining space
+          sx={{ marginRight: "10%" }} // Shift form 10% to the left
         >
-          <form
+          <Box
+            component="form"
             onSubmit={handleSubmit}
-            style={{
-              margin: "auto",
+            sx={{
               padding: "30px",
               boxShadow: "10px 10px 20px #000",
               borderRadius: "10px",
-              border: "none",
+              border: "3px solid transparent", // Set initial border to transparent
+              borderColor: "violet", // Set border color
+              animation: "fadeInBorder 1s ease-in-out", // Apply animation
+              '@keyframes fadeInBorder': { // Define the fade-in animation
+                '0%': { borderColor: 'transparent' },
+                '100%': { borderColor: 'violet' },
+              },
+              width: '100%', // Full width for responsiveness
+              maxWidth: '400px', // Set a max width for the form
+              display: 'flex', // Set to flex to manage alignment easily
+              flexDirection: 'column', // Arrange children vertically
             }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
+            {/* Login Title */}
+            <Typography
+              variant="h4"
+              textAlign="center"
+              padding={2}
+              fontWeight={600}
+            >
+              Login
+            </Typography>
+
+            {/* Email Label */}
+            <Typography
+              sx={{ 
+                marginBottom: "8px", 
+                fontWeight: "bold",
+                fontSize: "16px" 
               }}
             >
-              <Typography
-                variant="h4"
-                textAlign="center"
-                padding={2}
-                fontWeight={600}
-              >
-                Login
-              </Typography>
+              Email
+            </Typography>
+            <CustomizedInput type="email" name="email" />
 
-              {/* Email Label */}
-              <Typography
-                sx={{ 
-                  marginBottom: "8px", 
-                  fontWeight: "bold",
-                  fontSize: "16px" 
-                }}
-              >
-                Email
-              </Typography>
-              <CustomizedInput type="email" name="email" />
+            {/* Password Label */}
+            <Typography
+              sx={{ 
+                marginTop: "16px", 
+                marginBottom: "8px", 
+                fontWeight: "bold",
+                fontSize: "16px" 
+              }}
+            >
+              Password
+            </Typography>
+            <CustomizedInput type="password" name="password" />
 
-              {/* Password Label */}
-              <Typography
-                sx={{ 
-                  marginTop: "16px", 
-                  marginBottom: "8px", 
-                  fontWeight: "bold",
-                  fontSize: "16px" 
-                }}
-              >
-                Password
-              </Typography>
-              <CustomizedInput type="password" name="password" />
-
-              <Button
-                type="submit"
-                sx={{
-                  px: 2,
-                  py: 1,
-                  mt: 2,
-                  width: "400px",
-                  borderRadius: 2,
-                  bgcolor: "#00fffc",
-                  ":hover": {
-                    bgcolor: "white",
-                    color: "black",
-                  },
-                }}
-                endIcon={<IoIosLogIn />}
-              >
-                Login
-              </Button>
-            </Box>
-          </form>
+            <Button
+              type="submit"
+              sx={{
+                px: 2,
+                py: 1,
+                mt: 2,
+                width: "100%", // Full width for better responsiveness
+                borderRadius: 2,
+                bgcolor: "#00fffc",
+                ":hover": {
+                  bgcolor: "white",
+                  color: "black",
+                },
+              }}
+              endIcon={<IoIosLogIn />}
+            >
+              Login
+            </Button>
+          </Box>
         </Box>
       </Box>
     </>
