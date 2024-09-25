@@ -3,14 +3,7 @@ import { Box, Typography, Button, IconButton } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import ChatItem from "../components/chat/ChatItem";
 import { IoMdSend } from "react-icons/io";
-import { deleteUserChats, getUserChats, sendChatRequest } from "../helpers/api-communicator";
 import toast from "react-hot-toast";
-
-type Message = {
-  role: "user" | "assistant";
-  content: string;
-  type: "text" | "video"; // Distinguish between text and video messages
-};
 
 // Define theme with #7C3AED as the primary color
 const theme = createTheme({
@@ -48,7 +41,8 @@ const Chat = () => {
     if (content.toLowerCase() === "arjun") {
       const videoMessage: Message = {
         role: "assistant",
-        content: "https://myawsstestings3.s3.eu-north-1.amazonaws.com/Video+Files/1+h.mp4",
+        content:
+          "https://myawsstestings3.s3.eu-north-1.amazonaws.com/Video+Files/1+h.mp4",
         type: "video",
       };
       setChatMessages((prev) => [...prev, videoMessage]);
@@ -60,52 +54,57 @@ const Chat = () => {
         type: "text",
       };
       setChatMessages((prev) => [...prev, dummyResponse]);
-
-      // Uncomment this to use the actual API request instead
-      // const chatData = await sendChatRequest(content);
-      // setChatMessages([...chatData.chats]);
-    }
-
-    // Scroll to the bottom of the chat container after sending a message
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
 
-  const handleDeleteChats = async () => {
-    try {
-      toast.loading("Deleting Chats", { id: "deletechats" });
-      await deleteUserChats(); // Make sure the API works as intended
-      setChatMessages([]); // Clear the messages
-      toast.success("Deleted Chats Successfully", { id: "deletechats" });
+  const handleDeleteChats = () => {
+    // Clear the messages state
+    setChatMessages([]); // Clear the messages
 
-      // Scroll to the bottom after clearing messages
-      if (chatContainerRef.current) {
-        chatContainerRef.current.scrollTop = 0; // Set to 0 after clearing
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error("Deleting chats failed", { id: "deletechats" });
+    // Show success toast
+    toast.success("Deleted Chats Successfully", { id: "deletechats" });
+
+    // Scroll to the top after clearing messages
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = 0; // Set to 0 after clearing
     }
   };
 
   useLayoutEffect(() => {
-    toast.loading("Loading Chats", { id: "loadchats" });
-    getUserChats()
-      .then((data) => {
-        setChatMessages([...data.chats]);
-        toast.success("Successfully loaded chats", { id: "loadchats" });
+    // Simulate loading chats
+    const loadChats = async () => {
+      toast.loading("Loading Chats", { id: "loadchats" });
+      // Simulated chat messages
+      const initialMessages: Message[] = [
+        {
+          role: "assistant",
+          content: "Hello! How can I assist you?",
+          type: "text",
+        },
+      ];
+      setChatMessages(initialMessages);
+      toast.success("Successfully loaded chats", { id: "loadchats" });
 
-        // Scroll to the bottom after loading chats
-        if (chatContainerRef.current) {
-          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        toast.error("Loading Failed", { id: "loadchats" });
-      });
+      // Scroll to the bottom after loading chats
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop =
+          chatContainerRef.current.scrollHeight;
+      }
+    };
+
+    loadChats().catch((err) => {
+      console.log(err);
+      toast.error("Loading Failed", { id: "loadchats" });
+    });
   }, []);
+
+  // Effect to scroll to the bottom whenever chatMessages change
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   // Function to handle key down event
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -185,7 +184,8 @@ const Chat = () => {
                   color: "text.primary",
                 }}
               >
-                Ask questions related to Knowledge, Business, Advice, Education, etc. Avoid sharing personal information.
+                Ask questions related to Knowledge, Business, Advice, Education,
+                etc. Avoid sharing personal information.
               </Typography>
               <Button
                 onClick={handleDeleteChats}
@@ -260,11 +260,13 @@ const Chat = () => {
                     role={chat.role}
                     key={index}
                     sx={{
-                      backgroundColor: chat.role === "user" ? "primary.main" : "#5B27A0", // Violet theme for response
+                      backgroundColor:
+                        chat.role === "user" ? "primary.main" : "#5B27A0", // Violet theme for response
                       borderRadius: 2,
                       padding: "10px",
                       margin: "10px 0",
-                      alignSelf: chat.role === "user" ? "flex-end" : "flex-start",
+                      alignSelf:
+                        chat.role === "user" ? "flex-end" : "flex-start",
                     }}
                   />
                 )
@@ -281,27 +283,28 @@ const Chat = () => {
             >
               <input
                 ref={inputRef}
-                placeholder="Type your message..."
+                type="text"
+                placeholder="Type a message"
+                onKeyDown={handleKeyDown}
                 style={{
                   flex: 1,
                   padding: "10px",
                   borderRadius: "5px",
-                  border: "1px solid #7C3AED", // Border color
-                  backgroundColor: "#2C2C3D", // Input background
-                  color: "#FFFFFF", // Text color
+                  border: "1px solid #7C3AED",
+                  backgroundColor: "#2C2C3D",
+                  color: "#FFF",
                 }}
-                onKeyDown={handleKeyDown}
               />
               <IconButton
                 onClick={handleSubmit}
                 sx={{
-                  backgroundColor: "#7C3AED", // Send button color
-                  "&:hover": {
-                    backgroundColor: "#5B27A0", // Hover color
+                  bgcolor: "#7C3AED",
+                  ":hover": {
+                    bgcolor: "#5B27A0",
                   },
                 }}
               >
-                <IoMdSend size={24} color="white" />
+                <IoMdSend color="#FFF" />
               </IconButton>
             </Box>
           </Box>
@@ -312,3 +315,4 @@ const Chat = () => {
 };
 
 export default Chat;
+  
