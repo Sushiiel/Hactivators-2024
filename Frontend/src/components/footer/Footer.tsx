@@ -20,7 +20,7 @@ const Footer = () => {
               className="nav-link"
               to={"https://youtube.com/indiancoders"}
             >
-              Indian Coders
+            Hactivators
             </Link>
           </span>
           💘
