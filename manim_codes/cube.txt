@@ -1,0 +1,32 @@
+from manim import *
+
+class CubeVolumeVisualization(ThreeDScene):
+    def construct(self):
+        # Set up the axes
+        axes = ThreeDAxes(x_range=[0, 3, 1], y_range=[0, 3, 1], z_range=[0, 3, 1])
+        self.set_camera_orientation(phi=75 * DEGREES, theta=45 * DEGREES)
+        
+        # Create a cube with side length a
+        a = 2
+        cube = Cube(side_length=a).shift(OUT * a / 2)
+        cube.set_fill(BLUE, opacity=0.5)
+        
+        # Labels for the cube sides
+        side_label = MathTex("a").next_to(cube, RIGHT, buff=0.1)
+        volume_label = MathTex("V = a^3").to_corner(UL)
+        
+        # Add the objects to the scene
+        self.play(Create(axes))
+        self.play(Create(cube))
+        self.play(Write(side_label))
+        self.play(Write(volume_label))
+
+        # Rotate the cube for better visualization
+        self.begin_ambient_camera_rotation(rate=0.3)
+        self.wait(4)
+        self.stop_ambient_camera_rotation()
+
+        self.wait()
+
+# To render, save this file as cube_volume.py, and run it with the manim command:
+# manim -pql cube_volume.py CubeVolumeVisualization
