@@ -2,7 +2,7 @@ import { Box, useMediaQuery, createTheme, ThemeProvider, AppBar, Toolbar, Typogr
 import React from "react";
 import TypingAnim from "../components/typer/TypingAnim";
 import Footer from "../components/footer/Footer";
-
+import Header from "../components/Header.tsx";
 // Custom theme with violet and black
 const customTheme = createTheme({
   palette: {
@@ -24,6 +24,7 @@ const Home = () => {
 
   return (
     <ThemeProvider theme={customTheme}>
+                  <Header />
       <Box width={"100%"} height={"100%"} sx={{ backgroundColor: customTheme.palette.background.default }}>
 
 
