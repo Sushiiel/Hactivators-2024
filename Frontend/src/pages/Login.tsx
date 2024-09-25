@@ -4,6 +4,7 @@ import { Box, Typography, Button } from "@mui/material";
 import CustomizedInput from "../components/shared/CustomizedInput";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header.tsx";
+
 const Login = () => {
   const navigate = useNavigate();
 
@@ -58,12 +59,32 @@ const Login = () => {
               >
                 Login
               </Typography>
-              <CustomizedInput type="email" name="email" label="Email" />
-              <CustomizedInput
-                type="password"
-                name="password"
-                label="Password"
-              />
+
+              {/* Email Label */}
+              <Typography
+                sx={{ 
+                  marginBottom: "8px", 
+                  fontWeight: "bold",
+                  fontSize: "16px" 
+                }}
+              >
+                Email
+              </Typography>
+              <CustomizedInput type="email" name="email" />
+
+              {/* Password Label */}
+              <Typography
+                sx={{ 
+                  marginTop: "16px", 
+                  marginBottom: "8px", 
+                  fontWeight: "bold",
+                  fontSize: "16px" 
+                }}
+              >
+                Password
+              </Typography>
+              <CustomizedInput type="password" name="password" />
+
               <Button
                 type="submit"
                 sx={{
