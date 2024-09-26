@@ -26,9 +26,11 @@ function isCodeBlock(str: string) {
 const ChatItem = ({
   content,
   role,
+  sx, // Accept sx prop for additional styles
 }: {
   content: string;
   role: "user" | "assistant";
+  sx?: object; // Add sx prop
 }) => {
   const messageBlocks = extractCodeFromString(content);
 
@@ -43,6 +45,7 @@ const ChatItem = ({
         gap: 2,
         borderRadius: 2,
         my: 1,
+        ...sx, // Apply additional styles
       }}
     >
       {/* Avatar based on role */}
@@ -50,8 +53,7 @@ const ChatItem = ({
         {role === "assistant" ? (
           <img src="openai.png" alt="openai" width={"30px"} />
         ) : (
-          <>
-          </>
+          <></>
         )}
       </Avatar>
       <Box>

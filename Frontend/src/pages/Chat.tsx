@@ -7,30 +7,42 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { BASEURL } from "./constants";
 
-// Define theme with #7C3AED as the primary color
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#7C3AED", // Set primary color
+      main: "#7C3AED",
     },
     background: {
-      default: "#1E1E2D", // Background for the entire app
+      default: "#1E1E2D",
     },
     text: {
-      primary: "#FFFFFF", // White for primary text color
+      primary: "#FFFFFF",
     },
   },
   typography: {
-    fontFamily: "Work Sans, sans-serif", // Global font family
+    fontFamily: "Work Sans, sans-serif",
   },
 });
 
 const Chat = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const chatContainerRef = useRef<HTMLDivElement | null>(null); // Ref for the chat container
-  const [chatMessages, setChatMessages] = useState<[]>([]);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
   const [prompt, setPrompt] = useState<string>("");
 
+  // Save chats to localStorage
+  const saveChatsToLocalStorage = (messages: Message[]) => {
+    localStorage.setItem("chatMessages", JSON.stringify(messages));
+  };
+
+  // Retrieve chats from localStorage
+  const loadChatsFromLocalStorage = () => {
+    const storedMessages = localStorage.getItem("chatMessages");
+    if (storedMessages) {
+      return JSON.parse(storedMessages);
+    }
+    return [];
+  };
 
   const handleSubmit = async () => {
     const content = inputRef.current?.value as string;
@@ -38,78 +50,59 @@ const Chat = () => {
       inputRef.current.value = "";
     }
     const newMessage: Message = { role: "user", content, type: "text" };
-    setChatMessages((prev) => [...prev, newMessage]);
-    console.log("yoyo came inside handle submit")
-    try{
-      console.log("yoyoyoyoy try")
-      const formattedCode = content
-            .replace(/\\/g, '\\\\') // Escape backslashes
-            .replace(/"/g, '\\"')   // Escape double quotes
-            .replace(/\n/g, '\\n'); // Escape newline characters
-      const resp = await axios.post(`${BASEURL}v2/render`, {
-        code: prompt,
-        filename: "frontend.mp4"
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
+    setChatMessages((prev) => {
+      const updatedMessages = [...prev, newMessage];
+      saveChatsToLocalStorage(updatedMessages);
+      return updatedMessages;
+    });
+
+    try {
+      const resp = await axios.post(
+        `${BASEURL}v2/render`,
+        {
+          code: prompt,
+          filename: "frontend.mp4",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      });
-      console.log("yoyoyoyoy requested")
-      if(resp.data.video_url){
-        const newMessage = { role: "user", content, type: "text" };
-        // setChatMessages((prev) => [...prev, newMessage]);
+      );
+
+      if (resp.data.video_url) {
         const videoMessage = {
           role: "assistant",
           content: resp.data.video_url,
           type: "video",
         };
-        setChatMessages((prev) => [...prev, videoMessage]);
-
+        setChatMessages((prev) => {
+          const updatedMessages = [...prev, videoMessage];
+          saveChatsToLocalStorage(updatedMessages);
+          return updatedMessages;
+        });
       }
-    }catch(err){
-      console.log(err)
-    }
-
-   
-
-    // Show video message if input is "arjun"
-    if (content.toLowerCase() === "arjun") {
-      const videoMessage: Message = {
-        role: "assistant",
-        content:
-          "https://myawsstestings3.s3.eu-north-1.amazonaws.com/Video+Files/1+h.mp4",
-        type: "video",
-      };
-      setChatMessages((prev) => [...prev, videoMessage]);
-    } else {
-      // Simulate a dummy response
-      // const dummyResponse: Message = {
-      //   role: "assistant",
-      //   content: "response", // Dummy response
-      //   type: "text",
-      // };
-      // setChatMessages((prev) => [...prev, dummyResponse]);
+    } catch (err) {
+      console.log(err);
     }
   };
 
   const handleDeleteChats = () => {
-    // Clear the messages state
-    setChatMessages([]); // Clear the messages
-
-    // Show success toast
+    setChatMessages([]);
+    localStorage.removeItem("chatMessages");
     toast.success("Deleted Chats Successfully", { id: "deletechats" });
 
-    // Scroll to the top after clearing messages
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = 0; // Set to 0 after clearing
+      chatContainerRef.current.scrollTop = 0;
     }
   };
 
   useLayoutEffect(() => {
-    // Simulate loading chats
-    const loadChats = async () => {
-      toast.loading("Loading Chats", { id: "loadchats" });
-      // Simulated chat messages
+    const storedMessages = loadChatsFromLocalStorage();
+    if (storedMessages.length) {
+      setChatMessages(storedMessages);
+      toast.success("Loaded chats from local storage");
+    } else {
       const initialMessages: Message[] = [
         {
           role: "assistant",
@@ -118,34 +111,19 @@ const Chat = () => {
         },
       ];
       setChatMessages(initialMessages);
-      toast.success("Successfully loaded chats", { id: "loadchats" });
-
-      // Scroll to the bottom after loading chats
-      if (chatContainerRef.current) {
-        chatContainerRef.current.scrollTop =
-          chatContainerRef.current.scrollHeight;
-      }
-    };
-
-    loadChats().catch((err) => {
-      console.log(err);
-      toast.error("Loading Failed", { id: "loadchats" });
-    });
+    }
   }, []);
 
-  // Effect to scroll to the bottom whenever chatMessages change
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatMessages]);
 
-  // Function to handle key down event
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      event.preventDefault(); // Prevent default behavior of Enter key
-      handleSubmit(); // Call handleSubmit to send the message
+      event.preventDefault();
+      handleSubmit();
     }
   };
 
@@ -154,19 +132,18 @@ const Chat = () => {
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column", // Move EduVerse GPT to the top
+          flexDirection: "column",
           width: "100%",
-          height: "100vh", // Full height for the chatbox
+          height: "100vh",
           mt: 3,
           gap: 3,
-          bgcolor: "background.default", // Apply theme background color
+          bgcolor: "background.default",
         }}
       >
-        {/* EduVerse GPT heading at the top */}
         <Typography
           sx={{
             fontSize: "40px",
-            color: "text.primary", // Use theme text color
+            color: "text.primary",
             mb: 2,
             mx: "auto",
             fontWeight: "600",
@@ -175,50 +152,23 @@ const Chat = () => {
           EduVerse GPT
         </Typography>
 
-        <Box
-          sx={{
-            display: "flex",
-            flex: 1, // Take up all available space
-            gap: 3,
-          }}
-        >
-          <Box
-            sx={{
-              display: { md: "flex", xs: "none", sm: "none" },
-              flex: 0.2,
-              flexDirection: "column",
-            }}
-          >
+        <Box sx={{ display: "flex", flex: 1, gap: 3 }}>
+          <Box sx={{ display: { md: "flex", xs: "none", sm: "none" }, flex: 0.2, flexDirection: "column" }}>
             <Box
               sx={{
                 display: "flex",
                 width: "100%",
-                height: "80vh", // Match height with chatbox
-                bgcolor: "#2C2C3D", // Dark background for the side panel
+                height: "80vh",
+                bgcolor: "#2C2C3D",
                 borderRadius: 5,
                 flexDirection: "column",
                 mx: 3,
               }}
             >
-              <Typography
-                sx={{
-                  mx: "auto",
-                  fontFamily: "Work Sans",
-                  mt: 3,
-                  color: "text.primary",
-                }}
-              >
+              <Typography sx={{ mx: "auto", fontFamily: "Work Sans", mt: 3, color: "text.primary" }}>
                 Chat with EduVerse GPT
               </Typography>
-              <Typography
-                sx={{
-                  mx: "auto",
-                  fontFamily: "Work Sans",
-                  my: 4,
-                  p: 3,
-                  color: "text.primary",
-                }}
-              >
+              <Typography sx={{ mx: "auto", fontFamily: "Work Sans", my: 4, p: 3, color: "text.primary" }}>
                 Educational Animated Video Generator for Your Prompts.
               </Typography>
               <Button
@@ -226,14 +176,12 @@ const Chat = () => {
                 sx={{
                   width: "200px",
                   my: "auto",
-                  color: "text.primary", // Text color using theme
+                  color: "text.primary",
                   fontWeight: "700",
                   borderRadius: 3,
                   mx: "auto",
-                  bgcolor: "primary.main", // Primary color from theme
-                  ":hover": {
-                    bgcolor: "#5B27A0", // Darker shade for hover
-                  },
+                  bgcolor: "primary.main",
+                  ":hover": { bgcolor: "#5B27A0" },
                 }}
               >
                 Clear Conversation
@@ -247,79 +195,44 @@ const Chat = () => {
               flex: { md: 0.8, xs: 1, sm: 1 },
               flexDirection: "column",
               px: 3,
-              height: "80vh", // Chat and video height
+              height: "80vh",
               overflow: "hidden",
             }}
           >
             <Box
-              ref={chatContainerRef} // Attach the ref to the chat container
+              ref={chatContainerRef}
               sx={{
                 width: "100%",
-                height: "calc(100% - 100px)", // Adjust height to fit within container
+                height: "calc(100% - 100px)",
                 borderRadius: 3,
                 mx: "auto",
                 display: "flex",
                 flexDirection: "column",
-                overflowY: "auto", // Enable scrolling for long chat
+                overflowY: "auto",
                 scrollBehavior: "smooth",
-                "&::-webkit-scrollbar": {
-                  width: "10px", // Width of the scrollbar
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: "#7C3AED", // Scrollbar color
-                  borderRadius: "10px", // Rounded corners
-                },
-                "&::-webkit-scrollbar-track": {
-                  backgroundColor: "#2C2C3D", // Track color
-                },
+                "&::-webkit-scrollbar": { width: "10px" },
+                "&::-webkit-scrollbar-thumb": { backgroundColor: "#7C3AED", borderRadius: "10px" },
+                "&::-webkit-scrollbar-track": { backgroundColor: "#2C2C3D" },
               }}
             >
-              {chatMessages.map((chat, index) =>
-                chat.type === "video" ? (
-                  <video
-                    key={index}
-                    controls
-                    style={{
-                      width: "100%",
-                      maxHeight: "calc(100% - 20px)", // Scale video to fit
-                      objectFit: "contain", // Contain within bounds
-                    }}
-                  >
-                    <source src={chat.content} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  <ChatItem
-                    content={chat.content}
-                    role={chat.role}
-                    key={index}
-                    sx={{
-                      backgroundColor:
-                        chat.role === "user" ? "primary.main" : "#5B27A0", // Violet theme for response
-                      borderRadius: 2,
-                      padding: "10px",
-                      margin: "10px 0",
-                      alignSelf:
-                        chat.role === "user" ? "flex-end" : "flex-start",
-                    }}
-                  />
-                )
-              )}
+              {chatMessages.map((chat, index) => (
+                <ChatItem
+                  key={index}
+                  content={chat.content}
+                  role={chat.role}
+                  sx={{
+                    alignSelf: chat.role === "user" ? "flex-end" : "flex-start", // User on right, assistant on left
+                  }}
+                />
+              ))}
             </Box>
 
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                mt: 2,
-                width: "100%",
-              }}
-            >
+            <Box sx={{ display: "flex", gap: 1, mt: 2, width: "100%" }}>
               <textarea
                 ref={inputRef}
                 placeholder="Type a message"
                 onKeyDown={handleKeyDown}
-                onChange={(e) => {setPrompt(e.target.value)}}
+                onChange={(e) => setPrompt(e.target.value)}
                 style={{
                   flex: 1,
                   padding: "10px",
@@ -331,12 +244,7 @@ const Chat = () => {
               />
               <IconButton
                 onClick={handleSubmit}
-                sx={{
-                  bgcolor: "#7C3AED",
-                  ":hover": {
-                    bgcolor: "#5B27A0",
-                  },
-                }}
+                sx={{ bgcolor: "#7C3AED", ":hover": { bgcolor: "#5B27A0" } }}
               >
                 <IoMdSend color="#FFF" />
               </IconButton>
@@ -349,4 +257,3 @@ const Chat = () => {
 };
 
 export default Chat;
-  
